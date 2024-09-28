@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css">
+	<link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+	<link rel="stylesheet" href="../css/usermanagementuser.css">	
+	<title>User Management</title>
+</head>
+<body>
+	
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+		<a href="index.html" class="brand"><img src="../images/logo.png" width="70px" height="70px"></i> TAGA-CUYO</a>
+		<ul class="side-menu">
+			<li><a href="index.html" ><i class='bx bxs-dashboard icon'></i> Admin Dashboard</a></li>
+			<li class="divider" data-text="main">Main</li>
+
+
+			<li>
+				<a href="#"><i class='bx bxs-inbox icon' class="active"></i> User Management <i class='bx bx-chevron-right icon-right' ></i></a>
+				<ul class="side-dropdown">
+					<li><a href="user_management_user.html"><i class='mdi mdi-clock icon'class="active"></i> List of Users</a></li>
+					<li><a href="user_management_list.html" ><i class='uil uil-notes icon'></i> Manage Staff</a></li>
+				</ul>
+				
+			</li>
+			<li><a href="reports_and_analytics.html"><i class='bx bxs-widget icon'></i> Reports and Analytics</a></li>
+			<li><a href="feedback.html"><i class='bx bxs-user-circle icon'></i> Support and Feedback</a></li>
+			<li><a href="#" ><i class='bx bxs-cog icon'></i> Settings</a></li>
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+	<!-- NAVBAR -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu toggle-sidebar'></i>
+			<form action="#">
+				<div class="form-group">
+					<input type="text" placeholder="Search...">
+					<i class='bx bx-search icon'></i>
+				</div>
+			</form>
+			
+			</a>
+			<span class="divider"></span>
+			<div class="profile">
+				<img src="../images/angel.jpg" alt="">
+				<ul class="profile-link">
+					<li><a href="/settings"><i class='bx bxs-cog'></i> Settings</a></li>
+					<li><a href="/logout"><i class='bx bxs-log-out-circle'></i> Logout</a></li>
+				</ul>
+			</div>
+		</nav>
+		<!-- NAVBAR -->
+    
+        <div class="user-management">
+            <h2>User Management > List of users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Joined Date</th>
+                        <th>Gender</th>
+                        <th>Age</th>
+                        <th>Active Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="user-icon"></div>
+                            <div class="user-details">
+                                <p>Hannah Faith</p>
+                                <p class="email">abc1234@gmail.com</p>
+                            </div>
+                        </td>
+                        <td>November 03, 2024</td>
+                        <td>Female</td>
+                        <td>18</td>
+                        <td>20 minutes ago</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="user-icon"></div>
+                            <div class="user-details">
+                                <p>Fiona Paller</p>
+                                <p class="email">123abc@gmail.com</p>
+                            </div>
+                        </td>
+                        <td>November 08, 2024</td>
+                        <td>Female</td>
+                        <td>15</td>
+                        <td>1 hour ago</td>
+                    </tr>
+                    <!-- Continue adding more rows as needed -->
+                </tbody>
+            </table>
+        </div>
+        <script src="scripts.js"></script>
+</html>
