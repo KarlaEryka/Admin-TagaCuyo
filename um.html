@@ -13,8 +13,8 @@
         // Import the Firebase SDK functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-        import { getAuth, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -30,70 +30,15 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app); // Initialize Realtime Database
-        const firestore = getFirestore(app); // Initialize Firestore
+        const database = getDatabase(app);
+        const firestore = getFirestore(app);
         const auth = getAuth(app); // Initialize authentication
 
         // Load existing staff from Realtime Database
         const staffTable = document.getElementById('staffTable');
-        onValue(ref(database, 'staff'), (snapshot) => {
-            staffTable.innerHTML = ''; // Clear the table before updating
-            snapshot.forEach((childSnapshot) => {
-                const staffData = childSnapshot.val();
-                const row = `
-                    <tr>    
-                        <td>${staffData.name}</td>
-                        <td>Staff</td>
-                        <td>Active</td>
-                        <td class="actions">
-                            <button class="btn btn-danger btn-sm" onclick="deleteStaff('${childSnapshot.key}', '${staffData.email}')">Delete</button>
-                            <button class="btn btn-warning btn-sm" onclick="resetPassword('${staffData.email}')">Reset Password</button>
-                        </td>
-                    </tr>
-                `;
-                staffTable.innerHTML += row; // Add new row to the table
-            });
-        });
-
-        // Function to delete staff
-       // Function to delete staff
-// Function to delete staff
-window.deleteStaff = function(id, email) {
-    const confirmation = confirm(`Are you sure you want to delete ${email}?`);
-    if (!confirmation) {
-        console.log('Deletion cancelled by user.');
-        return;
-    }
-
-    // Remove from Realtime Database
-    const staffRef = ref(database, 'staff/' + id);
-    console.log(`Attempting to delete staff with ID: ${id} and Email: ${email}`);
-    
-    remove(staffRef)
-        .then(() => {
-            console.log('Staff deleted successfully from Realtime Database');
-            
-            // Delete from Firestore using deleteDoc
-            const staffDoc = doc(firestore, 'staff', id);
-            return deleteDoc(staffDoc);  // Use deleteDoc here
-        })
-        .then(() => {
-            console.log('Staff deleted successfully from Firestore!');
-            alert('Staff deleted successfully!');
-            reloadStaffTable();
-        })
-        .catch((error) => {
-            console.error("Error deleting staff: ", error);
-            alert('Failed to delete staff: ' + error.message);
-        });
-};
-
-
-
-        // Function to reload staff table
-        function reloadStaffTable() {
-            staffTable.innerHTML = ''; // Clear the current table content
+        function loadStaffTable() {
             onValue(ref(database, 'staff'), (snapshot) => {
+                staffTable.innerHTML = ''; // Clear the table before updating
                 snapshot.forEach((childSnapshot) => {
                     const staffData = childSnapshot.val();
                     const row = `
@@ -111,6 +56,106 @@ window.deleteStaff = function(id, email) {
                 });
             });
         }
+        loadStaffTable(); // Call function to load staff
+
+        // Handle form submission for adding new staff
+        const staffForm = document.getElementById('staffForm');
+        staffForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent the form from refreshing the page
+
+            const staffEmail = document.getElementById('staffEmail').value;
+            const staffName = document.getElementById('staffName').value;
+            const staffPassword = "defaultPassword"; // Use a default password or prompt the user to enter one
+
+            // Create a user in Firebase Authentication
+            createUserWithEmailAndPassword(auth, staffEmail, staffPassword)
+                .then((userCredential) => {
+                    // User created successfully
+                    const userId = userCredential.user.uid;
+
+                    // Save staff data to Realtime Database
+                    set(ref(database, 'staff/' + userId), {
+                        email: staffEmail,
+                        name: staffName,
+                        createdAt: new Date().toISOString() // Save current timestamp
+                    }).then(() => {
+                        console.log("Staff added to Realtime Database");
+
+                        // Save staff data to Firestore (under 'staff' collection)
+                        setDoc(doc(firestore, 'staff', userId), {
+                            email: staffEmail,
+                            name: staffName,
+                            createdAt: new Date() // Save current timestamp
+                        }).then(() => {
+                            console.log("Staff added to Firestore under 'staff' collection");
+                            alert('Staff added successfully!');
+                            loadStaffTable(); // Refresh the staff table
+                            // Close the modal
+                            const modal = document.getElementById('addStaffModal');
+                            $(modal).modal('hide'); // Use jQuery to hide the modal
+                        }).catch((error) => {
+                            console.error("Error writing to Firestore: ", error);
+                            alert('Failed to save staff to Firestore: ' + error.message);
+                        });
+                    }).catch((error) => {
+                        console.error("Error writing to Realtime Database: ", error);
+                        alert('Failed to save staff to Realtime Database: ' + error.message);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error creating user: ", error);
+                    alert('Failed to create staff: ' + error.message);
+                });
+        });
+
+        // Function to delete staff
+        window.deleteStaff = function(id, email) {
+            // Confirm before deletion
+            const confirmation = confirm(`Are you sure you want to delete ${email}?`);
+            if (!confirmation) {
+                return; // Exit if the user cancels
+            }
+
+            // Remove from Realtime Database
+            const staffRef = ref(database, 'staff/' + id);
+            console.log(`Attempting to delete staff with ID: ${id} and Email: ${email}`);
+    
+            remove(staffRef)
+                .then(() => {
+                    console.log('Staff deleted successfully from Realtime Database');
+                    
+                    // Delete from Firestore using deleteDoc
+                    const staffDoc = doc(firestore, 'staff', id);
+                    return deleteDoc(staffDoc);  // Use deleteDoc here
+                })
+                .then(() => {
+                    console.log('Staff deleted successfully from Firestore!');
+                    alert('Staff deleted successfully!');
+                    loadStaffTable(); // Refresh the staff table
+                })
+                .catch((error) => {
+                    console.error("Error deleting staff: ", error);
+                    alert('Failed to delete staff: ' + error.message);
+                });
+        };
+        window.resetPassword = function(email) {
+    // Ensure the email parameter is valid
+    if (!email) {
+        alert("No email address provided.");
+        return;
+    }
+
+    // Send password reset email
+    sendPasswordResetEmail(auth, email) // Use the correct method
+        .then(() => {
+            alert(`Password reset email sent to ${email}. Please check your inbox.`);
+            console.log('Password reset email sent successfully to: ' + email);
+        })
+        .catch((error) => {
+            console.error("Error sending password reset email: ", error);
+            alert('Failed to send password reset email: ' + error.message);
+        });
+};
 
     </script>
 </head>
@@ -185,7 +230,7 @@ window.deleteStaff = function(id, email) {
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form id="addStaffForm">
+                        <form id="staffForm">
                             <div class="form-group">
                                 <label for="staffName">Name</label>
                                 <input type="text" class="form-control" id="staffName" required>
@@ -194,24 +239,16 @@ window.deleteStaff = function(id, email) {
                                 <label for="staffEmail">Email</label>
                                 <input type="email" class="form-control" id="staffEmail" required>
                             </div>
-                            <div class="form-group">
-                                <label for="staffRole">Role</label>
-                                <select class="form-control" id="staffRole" required>
-                                    <option value="Staff">Staff</option>
-                                    <option value="Admin">Admin</option>
-                                </select>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Add Staff</button>
-                            </div>
+                            <button type="submit" class="btn btn-primary">Add Staff</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Add Staff Modal -->
     </section>
     <!-- CONTENT -->
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
