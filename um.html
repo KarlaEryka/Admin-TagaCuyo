@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <link rel="stylesheet" href="usermanagementlist.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <title>User Management</title>
+    <script type="module">
+        // Import the Firebase SDK functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_VoT0W3zD6u5GVEa24dLcMkt3DJtnqYg",
+            authDomain: "tagalog-cuyonon-mobile-app.firebaseapp.com",
+            databaseURL: "https://tagalog-cuyonon-mobile-app-default-rtdb.firebaseio.com",
+            projectId: "tagalog-cuyonon-mobile-app",
+            storageBucket: "tagalog-cuyonon-mobile-app.appspot.com",
+            messagingSenderId: "598478516019",
+            appId: "1:598478516019:web:e680422657a9ebde305846",
+            measurementId: "G-9R8PRFSXQ1"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app); // Initialize Realtime Database
+        const firestore = getFirestore(app); // Initialize Firestore
+        const auth = getAuth(app); // Initialize authentication
+
+        // Load existing staff from Realtime Database
+        const staffTable = document.getElementById('staffTable');
+        onValue(ref(database, 'staff'), (snapshot) => {
+            staffTable.innerHTML = ''; // Clear the table before updating
+            snapshot.forEach((childSnapshot) => {
+                const staffData = childSnapshot.val();
+                const row = `
+                    <tr>    
+                        <td>${staffData.name}</td>
+                        <td>Staff</td>
+                        <td>Active</td>
+                        <td class="actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteStaff('${childSnapshot.key}', '${staffData.email}')">Delete</button>
+                            <button class="btn btn-warning btn-sm" onclick="resetPassword('${staffData.email}')">Reset Password</button>
+                        </td>
+                    </tr>
+                `;
+                staffTable.innerHTML += row; // Add new row to the table
+            });
+        });
+
+        // Function to delete staff
+       // Function to delete staff
+// Function to delete staff
+window.deleteStaff = function(id, email) {
+    const confirmation = confirm(`Are you sure you want to delete ${email}?`);
+    if (!confirmation) {
+        console.log('Deletion cancelled by user.');
+        return;
+    }
+
+    // Remove from Realtime Database
+    const staffRef = ref(database, 'staff/' + id);
+    console.log(`Attempting to delete staff with ID: ${id} and Email: ${email}`);
+    
+    remove(staffRef)
+        .then(() => {
+            console.log('Staff deleted successfully from Realtime Database');
+            
+            // Delete from Firestore using deleteDoc
+            const staffDoc = doc(firestore, 'staff', id);
+            return deleteDoc(staffDoc);  // Use deleteDoc here
+        })
+        .then(() => {
+            console.log('Staff deleted successfully from Firestore!');
+            alert('Staff deleted successfully!');
+            reloadStaffTable();
+        })
+        .catch((error) => {
+            console.error("Error deleting staff: ", error);
+            alert('Failed to delete staff: ' + error.message);
+        });
+};
+
+
+
+        // Function to reload staff table
+        function reloadStaffTable() {
+            staffTable.innerHTML = ''; // Clear the current table content
+            onValue(ref(database, 'staff'), (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const staffData = childSnapshot.val();
+                    const row = `
+                        <tr>
+                            <td>${staffData.name}</td>
+                            <td>Staff</td>
+                            <td>Active</td>
+                            <td class="actions">
+                                <button class="btn btn-danger btn-sm" onclick="deleteStaff('${childSnapshot.key}', '${staffData.email}')">Delete</button>
+                                <button class="btn btn-warning btn-sm" onclick="resetPassword('${staffData.email}')">Reset Password</button>
+                            </td>
+                        </tr>
+                    `;
+                    staffTable.innerHTML += row; // Add new row to the table
+                });
+            });
+        }
+
+    </script>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <section id="sidebar">
+        <a href="index.html" class="brand"><img src="images/logo.png" width="70px" height="70px"> TAGA-CUYO</a>
+        <ul class="side-menu">
+            <li><a href="index.html"><i class='bx bxs-dashboard icon'></i> Admin Dashboard</a></li>
+            <li class="divider" data-text="main">Main</li>
+            <li>
+                <a href="#"><i class='bx bxs-inbox icon' class="active"></i> User Management <i class='bx bx-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="user_management.html"><i class='mdi mdi-clock icon'></i> List of Users</a></li>
+                    <li><a href="user_management_list.html" class="active"><i class='uil uil-notes icon'></i> Manage Staff</a></li>
+                </ul>
+            </li>
+            <li><a href="reports_and_analytics.html"><i class='bx bxs-widget icon'></i> Reports and Analytics</a></li>
+            <li><a href="feedback.html"><i class='bx bxs-user-circle icon'></i> Support and Feedback</a></li>
+            <li><a href="settings.html"><i class='bx bxs-cog icon'></i> Settings</a></li>
+        </ul>
+    </section>
+    <!-- SIDEBAR -->
+
+    <!-- NAVBAR -->
+    <section id="content">
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <form action="#">
+                <div class="form-group">
+                    <input type="text" placeholder="Search...">
+                    <i class='bx bx-search icon'></i>
+                </div>
+            </form>
+            <span class="divider"></span>
+            <div class="profile">
+                <img src="images/angel.jpg" alt="">
+                <ul class="profile-link">
+                    <li><a href="/settings"><i class='bx bxs-cog'></i> Settings</a></li>
+                    <li><a href="/logout"><i class='bx bxs-log-out-circle'></i> Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+        <!-- NAVBAR -->
+
+        <h2>User Management > Manage Staff</h2>
+        <div class="container">
+            <button class="add-btn" data-toggle="modal" data-target="#addStaffModal">Add New Staff</button>
+            <table class="table table-bordered mt-3" id="staffTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Staff rows will be populated here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Staff Modal -->
+        <div class="modal fade" id="addStaffModal" tabindex="-1" role="dialog" aria-labelledby="addStaffModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addStaffModalLabel">Add New Staff</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addStaffForm">
+                            <div class="form-group">
+                                <label for="staffName">Name</label>
+                                <input type="text" class="form-control" id="staffName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="staffEmail">Email</label>
+                                <input type="email" class="form-control" id="staffEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="staffRole">Role</label>
+                                <select class="form-control" id="staffRole" required>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Admin">Admin</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Add Staff</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Add Staff Modal -->
+    </section>
+    <!-- CONTENT -->
+</body>
+</html>
