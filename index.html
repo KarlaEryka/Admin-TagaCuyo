@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css">
+	<link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+	<link rel="stylesheet" href="../css/index.css">	
+	<title>Admin Dashboard</title>
+</head>
+<body>
+	
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+		<a href="#" class="brand"><img src="../images/logo.png" width="70px" height="70px"></i> TAGA-CUYO</a>
+		<ul class="side-menu">
+			<li><a href="#" class="active"><i class='bx bxs-dashboard icon'></i> Admin Dashboard</a></li>
+			<li class="divider" data-text="main">Main</li>
+
+
+			<li>
+				<a href="#"><i class='bx bxs-inbox icon' ></i> User Management <i class='bx bx-chevron-right icon-right' ></i></a>
+				<ul class="side-dropdown">
+					<li><a href="user_management_user.html" class="active"><i class='mdi mdi-clock icon'></i> List of Users</a></li>
+					<li><a href="user_management_list.html"><i class='uil uil-notes icon'></i> Manage Staff</a></li>
+				</ul>
+				
+			</li>
+			<li><a href="reports_and_analytics.html"><i class='bx bxs-widget icon'></i> Reports and Analytics</a></li>
+			<li><a href="support_feedback.html"><i class='bx bxs-user-circle icon'></i> Support and Feedback</a></li>
+			<li><a href="settings.html"><i class='bx bxs-cog icon'></i> Settings</a></li>
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+	<!-- NAVBAR -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu toggle-sidebar'></i>
+			<form action="#">
+				<div class="form-group">
+					<input type="text" placeholder="Search...">
+					<i class='bx bx-search icon'></i>
+				</div>
+			</form>
+			
+			</a>
+			<span class="divider"></span>
+			<div class="profile">
+				<img src="../images/angel.jpg" alt="">
+				<ul class="profile-link">
+					<li><a href="/profile"><i class='bx bxs-user-circle icon'></i> Profile</a></li>
+					<li><a href="/settings"><i class='bx bxs-cog'></i> Settings</a></li>
+					<li><a href="/logout"><i class='bx bxs-log-out-circle'></i> Logout</a></li>
+				</ul>
+			</div>
+		</nav>
+		<!-- NAVBAR -->
+
+		<!-- MAIN -->
+		<main>
+			<h2>Admin Dashboard</h2>
+			<!-- Content related to History, Reports, etc., can be dynamically loaded here -->
+		</main>
+		<!-- MAIN -->
+	</section>
+	
+	<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+	<script src="script.js"></script>
+</body>
+</html>
